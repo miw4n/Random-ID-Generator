@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Random ID Generator - Realistic</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0f1c;
+  --card: rgba(17,24,39,0.85);
+  --muted:#9aa8bf;
+  --accent1:#60a5fa;
+  --accent2:#8b5cf6;
+  --text:#e6eef8;
+  --input-bg:rgba(255,255,255,0.05);
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,var(--bg) 0%, #061021 100%);color:var(--text);display:flex;align-items:flex-start;justify-content:center;padding:28px;}
+.wrap{width:100%;max-width:1100px;display:grid;grid-template-columns: 380px 1fr;gap:20px;}
+.panel{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.6);backdrop-filter: blur(8px);}
+h1{font-size:20px;margin:0 0 8px 0;text-align:left}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:12px}
+label{display:flex;justify-content:space-between;align-items:center;margin:8px 0;font-size:14px}
+input[type="text"], input[type="number"], select, textarea {width:60%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:var(--input-bg);color:var(--text);}
+select option{background:#111827;color:#e6eef8;}
+textarea{width:100%;min-height:80px;resize:vertical}
+.row{display:flex;gap:10px;align-items:center}
+.checkboxes{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+button{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
+button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px}
+.small{padding:6px 8px;font-size:13px;border-radius:8px}
+.gen-controls{display:flex;gap:8px;align-items:center;margin-top:10px}
+.output{display:grid;gap:12px;max-height:78vh;overflow:auto;padding:8px}
+.card-id{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:10px;display:flex;gap:10px;align-items:center;border:1px solid rgba(255,255,255,0.03);}
+.avatar{width:70px;height:70px;border-radius:12px;flex:0 0 70px;overflow:hidden;border:1px solid rgba(255,255,255,0.03);}
+.id-body{flex:1;display:flex;flex-direction:column;gap:4px}
+.id-line{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:13px}
+.tag{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:13px}
+.actions{display:flex;gap:8px}
+.right-col-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr; padding-bottom:60px}.avatar{width:60px;height:60px}}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="panel">
+    <h1>Random ID Generator</h1>
+    <div class="subtitle">Generate realistic fictional identities from 10 countries. Names & addresses match the country.</div>
+    <label>Country:
+      <select id="country" multiple style="height:100px">
+        <option value="FR">France</option>
+        <option value="US">USA</option>
+        <option value="JP">Japan</option>
+        <option value="GB">UK</option>
+        <option value="DE">Germany</option>
+        <option value="AU">Australia</option>
+        <option value="CA">Canada</option>
+        <option value="ES">Spain</option>
+        <option value="IT">Italy</option>
+        <option value="BR">Brazil</option>
+      </select>
+    </label>
+    <div style="margin-top:10px;">
+      <div style="font-weight:600;margin-bottom:6px">Fields to include</div>
+      <div class="checkboxes">
+        <label><input type="checkbox" class="fieldToggle" value="name" checked> Full name</label>
+        <label><input type="checkbox" class="fieldToggle" value="sex" checked> Sex</label>
+        <label><input type="checkbox" class="fieldToggle" value="age" checked> Age</label>
+        <label><input type="checkbox" class="fieldToggle" value="pseudo" checked> Pseudo (auto)</label>
+        <label><input type="checkbox" class="fieldToggle" value="address" checked> Address</label>
+        <label><input type="checkbox" class="fieldToggle" value="hobby" checked> Hobby</label>
+        <label><input type="checkbox" class="fieldToggle" value="pet"> Pet</label>
+        <label><input type="checkbox" class="fieldToggle" value="religion"> Religion</label>
+        <label><input type="checkbox" class="fieldToggle" value="email"> Email</label>
+        <label><input type="checkbox" class="fieldToggle" value="phone"> Phone</label>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <label>Number of IDs: <input id="count" type="number" value="5" min="1" max="200"></label>
+    </div>
+    <div class="gen-controls">
+      <button id="generate">Generate</button>
+      <button class="ghost" id="clear">Clear</button>
+      <button class="ghost" id="exportJSON">Export JSON</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="right-col-head">
+      <div>
+        <div style="font-weight:700">Generated IDs</div>
+        <div class="muted" id="generatedCount">0 profiles</div>
+      </div>
+      <div class="actions">
+        <button id="copyAllJson" class="small ghost">Copy JSON</button>
+        <button id="downloadJson" class="small">Download JSON</button>
+      </div>
+    </div>
+    <div class="output" id="output"></div>
+  </div>
+    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="miw4n" data-color="#FFDD00" data-emoji="🧋"  data-font="Cookie" data-text="Buy me a bubble tea" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+
+</div>
+
+<script>
+// ==== DATASETS COMPLETS ====
+const datasets = {
+  FR: {
+    firstNames:[
+      "Louis","Emma","Gabriel","Chloé","Lucas","Jade","Arthur","Léa","Hugo","Manon",
+      "Nathan","Camille","Maxime","Sarah","Clément","Julie","Mathis","Émilie","Paul","Anaïs",
+      "Tom","Inès","Alexandre","Marine","Vincent","Louna","Adrien","Zoé","Quentin","Margaux",
+      "Benoît","Léonie","Nicolas","Romane","Julien","Élodie","Samuel","Clara","Antoine","Elisa",
+      "Victor","Léna","Théo","Noémie","Romain","Célia","Malo","Fanny","Gaspard","Soline"
+    ],
+    lastNames:[
+      "Martin","Bernard","Dubois","Thomas","Robert","Richard","Petit","Durand","Leroy","Moreau",
+      "Simon","Michel","Lefebvre","Roux","David","Bertrand","Morel","Fournier","Girard","Bonnet",
+      "Francois","Blanc","Garnier","Faure","Chevalier","Lemoine","Marchand","Legrand","Gauthier","Dupuis",
+      "Bourgeois","Martinez","Colin","Jacquet","Philippe","Masson","Renaud","Dumas","Poirier","Barbier",
+      "Caron","Olivier","Perrin","Noël","Lucas","Guillaume","Renard","Benoit","Leclerc","Roy"
+    ],
+    streets:[
+      "Rue de Rivoli","Avenue Victor Hugo","Boulevard Saint-Germain","Rue de la Paix","Avenue des Champs-Élysées",
+      "Rue du Faubourg","Boulevard Haussmann","Rue Saint-Honoré","Avenue Foch","Rue de la République",
+      "Rue du Pont","Rue des Rosiers","Allée des Tilleuls","Place de la Concorde","Impasse des Lilas",
+      "Rue Voltaire","Rue Lafayette","Rue de l'Église","Rue du Marché","Chemin des Roses",
+      "Rue des Lilas","Rue des Violettes","Rue du Soleil","Rue des Jardins","Rue de la Fontaine",
+      "Rue du Château","Rue du Parc","Rue des Érables","Rue du Moulin","Rue des Peupliers",
+      "Avenue Jean Jaurès","Avenue de la Gare","Boulevard Victor","Rue des Acacias","Rue des Tilleuls",
+      "Rue de la Paix","Rue du Temple","Place de l'Hôtel de Ville","Boulevard Clemenceau","Rue de l'Industrie",
+      "Rue du Commerce","Rue du Théâtre","Rue des Écoles","Rue des Capucines","Rue de la Liberté","Rue du Prince",
+      "Place des Fleurs","Rue des Champs","Rue du Soleil Levant","Avenue des Fleurs","Boulevard de l'Opéra"
+    ].map(st=>`${Math.floor(Math.random()*150)+1} ${st}`),
+    cities:[
+      "Paris","Lyon","Marseille","Toulouse","Nice","Nantes","Strasbourg","Montpellier","Bordeaux","Lille",
+      "Rennes","Reims","Le Havre","Saint-Étienne","Toulon","Grenoble","Dijon","Angers","Nîmes","Villeurbanne",
+      "Clermont-Ferrand","Limoges","Tours","Amiens","Metz","Besançon","Orléans","Mulhouse","Rouen","Perpignan",
+      "Caen","Saint-Denis","Nancy","Argenteuil","Montreuil","Avignon","Poitiers","Nanterre","Versailles","Courbevoie",
+      "Vitry-sur-Seine","Colombes","Aulnay-sous-Bois","Asnières-sur-Seine","Rueil-Malmaison","Saint-Maur-des-Fossés","Pau","Cannes","La Rochelle","Annecy"
+    ]
+  },
+
+  US: {
+    firstNames:[
+      "James","Mary","John","Patricia","Robert","Jennifer","Michael","Linda","William","Elizabeth",
+      "David","Barbara","Richard","Susan","Joseph","Jessica","Thomas","Sarah","Charles","Karen",
+      "Daniel","Nancy","Matthew","Lisa","Anthony","Betty","Mark","Margaret","Donald","Sandra",
+      "Steven","Ashley","Paul","Kimberly","Andrew","Emily","Joshua","Donna","Kenneth","Michelle",
+      "Kevin","Dorothy","Brian","Carol","George","Amanda","Edward","Melissa","Ronald","Deborah"
+    ],
+    lastNames:[
+      "Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Rodriguez","Martinez",
+      "Hernandez","Lopez","Gonzalez","Wilson","Anderson","Thomas","Taylor","Moore","Jackson","Martin",
+      "Lee","Perez","Thompson","White","Harris","Sanchez","Clark","Ramirez","Lewis","Robinson",
+      "Walker","Young","Allen","King","Wright","Scott","Torres","Nguyen","Hill","Flores",
+      "Green","Adams","Nelson","Baker","Hall","Rivera","Campbell","Mitchell","Carter","Roberts"
+    ],
+    streets:[
+      "Main St","Broadway","Oak St","Maple Ave","Cedar Lane","Pine St","Washington Ave","Lakeview Dr","Hill St","Sunset Blvd",
+      "2nd St","3rd Ave","4th St","Elm St","River Rd","Park Ave","1st St","Cherry Ln","Spruce St","Willow Rd",
+      "Chestnut St","Walnut St","Locust St","Jackson St","Jefferson St","Madison Ave","Franklin St","Lincoln St","Adams St","Grant St",
+      "Monroe St","Harrison St","Wilson Ave","Taylor St","Polk St","Roosevelt St","Kennedy St","Coolidge St","Hoover St","Truman St",
+      "Eisenhower St","Reagan St","Bush St","Clinton St","Obama St","Adams Ave","Jefferson Ave","Madison St","Franklin Ave","Lincoln Ave"
+    ].map(st=>`${Math.floor(Math.random()*999)+1} ${st}`),
+    cities:[
+      "New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Jose",
+      "Austin","Jacksonville","Fort Worth","Columbus","Charlotte","San Francisco","Indianapolis","Seattle","Denver","Washington",
+      "Boston","El Paso","Nashville","Detroit","Oklahoma City","Portland","Las Vegas","Memphis","Louisville","Baltimore",
+      "Milwaukee","Albuquerque","Tucson","Fresno","Sacramento","Mesa","Kansas City","Atlanta","Long Beach","Colorado Springs",
+      "Raleigh","Miami","Virginia Beach","Omaha","Oakland","Minneapolis","Tulsa","Arlington","New Orleans","Wichita"
+    ]
+  },
+
+  JP: {
+    firstNames:[
+      "Haruto","Yui","Souta","Sakura","Ren","Hina","Yuto","Mio","Kaito","Rin",
+      "Sora","Riku","Akari","Yuma","Mei","Koki","Hana","Ryusei","Aya","Takumi",
+      "Kenta","Miyu","Sho","Yuna","Daiki","Haru","Rina","Shota","Hinata","Kaho",
+      "Tsubasa","Noa","Rei","Yuka","Itsuki","Rio","Minato","Sayaka","Itsuki","Mana",
+      "Shun","Nao","Ryo","Haruka","Kazuya","Saki","Kaito","Misaki","Ren","Riko"
+    ],
+    lastNames:[
+      "Sato","Suzuki","Takahashi","Tanaka","Watanabe","Ito","Yamamoto","Nakamura","Kobayashi","Kato",
+      "Yoshida","Yamada","Sasaki","Yamaguchi","Matsumoto","Inoue","Kimura","Shimizu","Hayashi","Saito",
+      "Hasegawa","Murakami","Fujita","Okada","Matsuda","Nakagawa","Endo","Abe","Shibata","Ishikawa",
+      "Fukuda","Hashimoto","Yamagishi","Hirano","Sugiyama","Hirano","Kondo","Okamoto","Mori","Ota",
+      "Hara","Nakajima","Matsui","Yamashita","Takeuchi","Hirano","Shinohara","Higuchi","Kawasaki","Nishimura"
+    ],
+    streets:[
+      "1-chome","2-chome","3-chome","4-chome","5-chome","6-chome","7-chome","8-chome","9-chome","Shinjuku",
+      "Shibuya","Ginza","Akihabara","Asakusa","Roppongi","Ebisu","Ueno","Ikebukuro","Harajuku","Nakameguro",
+      "Otemachi","Marunouchi","Kanda","Kamiyacho","Hibiya","Aoyama","Daikanyama","Nishi-Shinjuku","Shinbashi","Gotanda",
+      "Meguro","Akabanebashi","Akasaka","Tsukiji","Sumida","Kiyosumi","Kameido","Monzen-nakacho","Koto","Toyosu",
+      "Shinagawa","Setagaya","Chiyoda","Bunkyo","Taito","Minato","Chuo","Shinagawa","Meguro","Ota"
+    ].map(st=>`${Math.floor(Math.random()*50)+1} ${st}`),
+    cities:[
+      "Tokyo","Osaka","Kyoto","Nagoya","Sapporo","Fukuoka","Kobe","Kawasaki","Yokohama","Hiroshima",
+      "Sendai","Chiba","Saitama","Kitakyushu","Sagamihara","Niigata","Hamamatsu","Shizuoka","Okayama","Kumamoto",
+      "Funabashi","Hachioji","Matsuyama","Kanazawa","Utsunomiya","Mito","Nagasaki","Oita","Kagoshima","Toyama",
+      "Akita","Yamagata","Fukui","Tsu","Morioka","Fukushima","Kawagoe","Koshigaya","Matsumoto","Hirakata",
+      "Fujisawa","Kawanishi","Kasukabe","Numazu","Ichikawa","Nagano","Kurashiki","Obihiro","Kashiwa","Iwaki"
+    ]
+  },
+
+  GB: {
+    firstNames:[
+      "Oliver","Olivia","George","Amelia","Harry","Isla","Jack","Ava","Jacob","Emily",
+      "Noah","Ella","Charlie","Mia","Thomas","Sophia","Oscar","Grace","William","Lily",
+      "James","Jessica","Daniel","Sophie","Joseph","Ruby","Samuel","Isabelle","Benjamin","Chloe",
+      "Alexander","Hannah","Edward","Charlotte","Matthew","Emma","Henry","Lola","Michael","Sienna",
+      "Joshua","Evie","Leo","Lucy","Ryan","Daisy","Nathan","Freya","Ethan","Alice"
+    ],
+    lastNames:[
+      "Smith","Jones","Taylor","Brown","Williams","Wilson","Evans","Thomas","Roberts","Johnson",
+      "Lewis","Walker","Robinson","Wood","Thompson","White","Hughes","Edwards","Green","Hall",
+      "Clarke","Turner","Martin","Morris","Mitchell","Ward","Cook","Bennett","Cox","Gray",
+      "Richardson","James","Watson","Watts","Harrison","Russell","Chapman","Ellis","Carter","Bell",
+      "Parker","Griffin","Knight","Reid","Hunter","Palmer","Murray","Matthews","Hunt","Shaw"
+    ],
+    streets:[
+      "High Street","Station Road","Church Road","London Road","Victoria Road","Green Lane","Manor Road","Church Street","Park Road","The Avenue",
+      "The Crescent","The Close","Queens Road","Kings Road","Main Street","Mill Lane","School Lane","Church Lane","North Street","South Street",
+      "Station Street","Queen Street","George Street","Albert Road","Prince Street","King Street","Victoria Street","St. John's Road","Oxford Street","Regent Street",
+      "Cambridge Road","Oxford Road","Victoria Avenue","Park Lane","New Street","Market Street","Broad Street","High Road","King's Road","Church Lane",
+      "Queensway","West Street","East Street","North Road","South Road","Victoria Lane","King's Avenue","Queen's Avenue","Crescent Road","Manor Lane"
+    ].map(st=>`${Math.floor(Math.random()*150)+1} ${st}`),
+    cities:[
+      "London","Birmingham","Manchester","Leeds","Glasgow","Sheffield","Bradford","Liverpool","Edinburgh","Bristol",
+      "Cardiff","Coventry","Nottingham","Leicester","Sunderland","Brighton","Hull","Plymouth","Stoke-on-Trent","Wolverhampton",
+      "Southampton","Reading","Derby","Dundee","Newcastle","Portsmouth","Swansea","Middlesbrough","Norwich","Exeter",
+      "Aberdeen","York","Lancaster","Bath","Canterbury","Luton","Oxford","Cambridge","Inverness","Carlisle",
+      "Woking","Guildford","Basingstoke","Harlow","Basildon","Slough","Stockport","Chester","Rochdale","Hartlepool"
+    ]
+  },
+
+  DE: {
+    firstNames:[
+      "Max","Sophie","Paul","Emma","Lukas","Mia","Leon","Hannah","Finn","Anna",
+      "Elias","Lina","Jonas","Lea","Tim","Lena","Felix","Marie","Jan","Luisa",
+      "Moritz","Clara","Philipp","Laura","Simon","Amelie","Alexander","Charlotte","Niklas","Lilly",
+      "Fabian","Mara","David","Sarah","Kevin","Johanna","Julian","Lena","Nico","Lara",
+      "Daniel","Emily","Marc","Lina","Oliver","Sophie","Timothy","Marie","Maximilian","Emma"
+    ],
+    lastNames:[
+      "Müller","Schmidt","Schneider","Fischer","Weber","Meyer","Wagner","Becker","Schulz","Hoffmann",
+      "Koch","Bauer","Richter","Klein","Wolf","Schröder","Neumann","Schwarz","Zimmermann","Braun",
+      "Krüger","Hofmann","Hartmann","Lange","Schmitt","Werner","Schmitz","Krause","Meier","Lehmann",
+      "Schmid","Schumacher","Bergmann","Frank","Roth","Beck","Lorenz","Fuchs","Lang","Vogel",
+      "Weiss","Horn","Peters","Pohl","Otto","Pfeiffer","Jung","Vogt","Sommer","König"
+    ],
+    streets:[
+      "Hauptstraße","Bahnhofstraße","Schulstraße","Gartenstraße","Kirchstraße","Ringstraße","Bergstraße","Dorfstraße","Feldstraße","Goethestraße",
+      "Hinterstraße","Bahnhofplatz","Marktplatz","Schillerstraße","Rosenweg","Hermannstraße","Luisenstraße","Schützenstraße","Lindenstraße","Wiesenweg",
+      "Schlossstraße","Friedrichstraße","Mühlenweg","Kaiserstraße","Bachstraße","Lessingstraße","Mozartstraße","Goethestraße","Schillerstraße","Beethovenstraße",
+      "Mozartweg","Bachweg","Kantstraße","Kaiserweg","Feldweg","Hauptweg","Schulweg","Ringweg","Kirchenweg","Dorfweg",
+      "Bergweg","Parkstraße","Schillerweg","Goetheweg","Lindenweg","Ahornstraße","Birkenweg","Eichenstraße","Finkenweg","Vogelweg"
+    ].map(st=>`${Math.floor(Math.random()*150)+1} ${st}`),
+    cities:[
+      "Berlin","Hamburg","Munich","Cologne","Frankfurt","Stuttgart","Düsseldorf","Dortmund","Essen","Leipzig",
+      "Bremen","Dresden","Hanover","Nuremberg","Duisburg","Bochum","Wuppertal","Bielefeld","Bonn","Münster",
+      "Karlsruhe","Mannheim","Augsburg","Wiesbaden","Gelsenkirchen","Mönchengladbach","Braunschweig","Chemnitz","Kiel","Magdeburg",
+      "Freiburg","Oberhausen","Lübeck","Erfurt","Mainz","Rostock","Kassel","Hagen","Saarbrücken","Hamm",
+      "Potsdam","Heilbronn","Reutlingen","Fürth","Offenbach","Remscheid","Bamberg","Cottbus","Koblenz","Bremerhaven"
+    ]
+  },
+
+  AU: {
+    firstNames:[
+      "Oliver","Charlotte","Noah","Amelia","William","Olivia","Jack","Mia","Thomas","Isla",
+      "James","Grace","Lucas","Emily","Lachlan","Sophie","Ethan","Chloe","Leo","Lily",
+      "Harrison","Ella","Samuel","Zoe","Alexander","Ruby","Benjamin","Sienna","Liam","Lucy",
+      "Daniel","Matilda","Max","Hannah","Oscar","Evie","Jacob","Lola","Joshua","Ava",
+      "Connor","Charlotte","Nathan","Amelia","Ryan","Emily","Sebastian","Sophie","Lachlan","Mia"
+    ],
+    lastNames:[
+      "Smith","Jones","Williams","Brown","Wilson","Taylor","Evans","Martin","White","Harris",
+      "Walker","Thomas","Roberts","Johnson","Lewis","Miller","Anderson","Moore","Clark","Mitchell",
+      "King","Wright","Scott","Green","Baker","Adams","Nelson","Hill","Ramirez","Campbell",
+      "Robinson","Carter","Phillips","Evans","Turner","Parker","Collins","Edwards","Stewart","Morris",
+      "Murphy","Cook","Bell","Richardson","Bailey","Hughes","Foster","Gray","Kelly","Reid"
+    ],
+    streets:[
+      "George Street","Elizabeth Street","King Street","Victoria Street","Church Street","High Street","Station Road","Queen Street","Hill Street","Park Road",
+      "Mill Road","Bridge Street","Grafton Street","Market Street","Collins Street","Queen Victoria Street","Lonsdale Street","Flinders Street","Hunter Street","Pitt Street",
+      "Clarendon Street","Princes Street","Bourke Street","Lygon Street","St Kilda Road","Elizabeth Avenue","Chapel Street","Brisbane Street","Albert Street","William Street",
+      "Victoria Avenue","Main Street","Oxford Street","King William Street","Queen Elizabeth Street","Macquarie Street","Clarence Street","Hindley Street","Victoria Parade","Elizabeth Lane",
+      "Cambridge Street","Victoria Road","Church Lane","Market Lane","Princes Lane","Park Lane","High Lane","King Lane","Queen Lane","Mill Lane"
+    ].map(st=>`${Math.floor(Math.random()*150)+1} ${st}`),
+    cities:[
+      "Sydney","Melbourne","Brisbane","Perth","Adelaide","Gold Coast","Canberra","Newcastle","Wollongong","Logan City",
+      "Hobart","Geelong","Cairns","Toowoomba","Townsville","Darwin","Ballarat","Bendigo","Albury","Launceston",
+      "Sunshine Coast","Mackay","Rockhampton","Bundaberg","Hervey Bay","Nowra","Orange","Tamworth","Dubbo","Bathurst",
+      "Port Macquarie","Alice Springs","Mount Isa","Kalgoorlie","Bunbury","Launceston","Devonport","Whyalla","Mount Gambier","Burnie",
+      "Port Augusta","Wodonga","Shepparton","Warrnambool","Coffs Harbour","Goulburn","Mildura","Armidale","Wagga Wagga","Forster"
+    ]
+  },
+
+  CA: {
+    firstNames:[
+      "Liam","Emma","Noah","Olivia","Jackson","Ava","Lucas","Charlotte","Ethan","Sophia",
+      "Benjamin","Mia","William","Amelia","James","Isabella","Logan","Emily","Alexander","Ella",
+      "Jacob","Lily","Michael","Chloe","Daniel","Grace","Matthew","Sophie","Ryan","Madison",
+      "Nathan","Abigail","Samuel","Hannah","David","Avery","Connor","Scarlett","Isaac","Victoria",
+      "Leo","Penelope","Owen","Aria","Eli","Zoey","Caleb","Nora","Nathaniel","Stella"
+    ],
+    lastNames:[
+      "Smith","Brown","Tremblay","Martin","Roy","Gagnon","Lee","Wilson","Johnson","MacDonald",
+      "Clark","Walker","Anderson","Taylor","Campbell","White","Thompson","Robinson","Scott","Hall",
+      "Young","Allen","King","Wright","Scott","Green","Adams","Nelson","Baker","Mitchell",
+      "Campbell","Carter","Edwards","Evans","Morris","Turner","Hill","Moore","Bailey","Hughes",
+      "Crawford","Watson","Foster","Clark","Reid","Russell","Chapman","Bell","Palmer","Matthews"
+    ],
+    streets:[
+      "Main St","King St","Queen St","George St","Yonge St","Bay St","Dundas St","Broadway","College St","Front St",
+      "Richmond St","Adelaide St","Dundas St West","Queen Victoria St","Church St","Sherbrooke St","Bloor St","Elgin St","Water St","Grafton St",
+      "Queen St East","King St East","Bayview Ave","Bayview St","College Ave","Church St South","Richmond Rd","Adelaide Ave","Dundas Ave","Queen St West",
+      "University Ave","Simcoe St","Spadina Ave","Bloor St West","Dundas St East","Front St East","Front St West","Queen St North","King St North","Bay St South",
+      "Bay St North","Dundas St South","College St North","Sherbrooke St West","Sherbrooke St East","Bloor St East","Bloor St South","Elgin St West","Water St East","Grafton St West"
+    ].map(st=>`${Math.floor(Math.random()*999)+1} ${st}`),
+    cities:[
+      "Toronto","Montreal","Vancouver","Calgary","Edmonton","Ottawa","Winnipeg","Quebec City","Hamilton","Kitchener",
+      "Halifax","London","Victoria","Windsor","Saskatoon","Regina","St. John's","Barrie","Kelowna","Sherbrooke",
+      "Guelph","Moncton","Saint John","Thunder Bay","Charlottetown","Lethbridge","Red Deer","Kamloops","Chicoutimi","Fredericton",
+      "Prince George","Medicine Hat","Brantford","Belleville","Drummondville","Peterborough","Grande Prairie","Prince Albert","North Bay","Cape Breton",
+      "Sault Ste. Marie","Corner Brook","Timmins","Whitehorse","Yellowknife","Iqaluit","Moose Jaw","Smiths Falls","Estevan","Woodstock"
+    ]
+  },
+
+  ES: {
+    firstNames:[
+      "Hugo","Lucía","Martín","Sofía","Pablo","Valeria","Alejandro","Daniela","Diego","Maria",
+      "Javier","Camila","Adrián","Paula","David","Sara","Lucas","Claudia","Miguel","Elena",
+      "Álvaro","Carmen","Sergio","Noa","Antonio","Marta","Carlos","Julia","Juan","Laura",
+      "Fernando","Ana","José","Isabel","Manuel","Natalia","Raúl","Irene","Francisco","Beatriz",
+      "Diego","Victoria","Mario","Elisa","Roberto","Lucía","Eduardo","Carla","Ricardo","Paula"
+    ],
+    lastNames:[
+      "García","Martínez","López","Sánchez","Pérez","Gómez","Rodríguez","Fernández","Jiménez","Ruiz",
+      "Hernández","Díaz","Moreno","Muñoz","Álvarez","Romero","Alonso","Gutiérrez","Navarro","Torres",
+      "Domínguez","Vázquez","Ramos","Gil","Ramírez","Serrano","Blanco","Molina","Morales","Suárez",
+      "Ortega","Delgado","Castillo","Ortiz","Marín","Rubio","Medina","Iglesias","Cano","Hidalgo",
+      "Gallardo","Cruz","Fuentes","Camacho","Nieto","Giménez","Parra","Carrasco","Santos","Pineda"
+    ],
+    streets:[
+      "Calle Mayor","Calle Real","Avenida de la Constitución","Calle de Alcalá","Calle de Serrano",
+      "Paseo de la Castellana","Calle del Prado","Calle de Atocha","Gran Vía","Calle de Toledo",
+      "Calle de San Bernardo","Calle de Hortaleza","Calle de la Princesa","Calle de Fuencarral","Calle de Alcalde Sáinz de Baranda",
+      "Calle de Valencia","Calle de Bravo Murillo","Calle de Embajadores","Calle de Argüelles","Calle de Goya",
+      "Calle de Serranos","Avenida Diagonal","Gran Via de les Corts","Calle de Alcalde","Calle del Carmen","Calle de la Paz","Calle del Sol","Calle de la Luna","Calle Nueva","Calle Vieja",
+      "Avenida de América","Calle de Galicia","Calle de Navarra","Calle de Aragón","Calle de Castilla","Calle de León","Calle de Toledo","Calle de Sevilla","Calle de Málaga","Calle de Valencia"
+    ].map(st=>`${Math.floor(Math.random()*150)+1} ${st}`),
+    cities:[
+      "Madrid","Barcelona","Valencia","Seville","Zaragoza","Málaga","Murcia","Palma","Bilbao","Alicante",
+      "Córdoba","Valladolid","Vigo","Gijón","Hospitalet de Llobregat","Vitoria-Gasteiz","La Coruña","Granada","Elche","Oviedo",
+      "Badalona","Cartagena","Sabadell","Móstoles","Alcalá de Henares","Pamplona","Fuenlabrada","Leganés","San Sebastián","Getafe",
+      "Burgos","Almería","Santander","Albacete","Castellón de la Plana","San Fernando","Logroño","Badajoz","Salamanca","Huelva",
+      "Lleida","Tarragona","Lorca","Ourense","Cáceres","Girona","Ceuta","Melilla","Palencia","Tarrasa"
+    ]
+  },
+
+  IT: {
+    firstNames:[
+      "Lorenzo","Sofia","Leonardo","Aurora","Alessandro","Giulia","Matteo","Alice","Francesco","Ginevra",
+      "Tommaso","Beatrice","Gabriele","Emma","Riccardo","Martina","Edoardo","Chiara","Luca","Sara",
+      "Davide","Emma","Simone","Elisa","Marco","Valentina","Andrea","Francesca","Niccolò","Giada",
+      "Filippo","Gaia","Alessia","Mattia","Federico","Alice","Daniele","Marta","Antonio","Claudia",
+      "Nicola","Camilla","Stefano","Alice","Giovanni","Ilaria","Jacopo","Chiara","Riccardo","Aurora"
+    ],
+    lastNames:[
+      "Rossi","Russo","Ferrari","Esposito","Bianchi","Romano","Colombo","Ricci","Marino","Greco",
+      "Bruno","Galli","Conti","De Luca","Mancini","Costa","Giordano","Rizzo","Lombardi","Moretti",
+      "Barbieri","Fontana","Santoro","Mariani","Rinaldi","Caruso","Ferrara","Longo","Gentile","Martini",
+      "Giorgi","Sorrentino","Ruggiero","Bianco","Coppola","Monti","Palumbo","Lombardo","De Santis","Grassi",
+      "Villa","Amato","Marchetti","Testa","Carbone","De Rosa","Milano","Barone","Serra","Fabbri"
+    ],
+    streets:[
+      "Via Roma","Via Milano","Corso Vittorio Emanuele II","Via Garibaldi","Via Dante",
+      "Piazza Venezia","Via Napoli","Corso Buenos Aires","Via Torino","Via dei Fori Imperiali",
+      "Via del Corso","Piazza del Duomo","Via XX Settembre","Via della Libertà","Corso Umberto I",
+      "Via Mazzini","Via Cavour","Via Manzoni","Piazza San Marco","Via Giolitti",
+      "Via dei Mille","Via San Giovanni","Via Roma Nuova","Corso Regina Margherita","Via Santa Lucia",
+      "Via Alessandro Manzoni","Via Giuseppe Verdi","Via Umberto I","Via San Pietro","Via Monte Napoleone",
+      "Via Vittorio Emanuele","Via della Pace","Corso Vittorio","Via Galileo Galilei","Via Leonardo da Vinci",
+      "Via Guglielmo Marconi","Via Michelangelo","Via Giuseppe Garibaldi","Via San Marco","Via Dante Alighieri",
+      "Via Nazionale","Via dei Giardini","Via della Stazione","Via Torino Nuova","Via Roma Vecchia",
+      "Via delle Rose","Via delle Viole","Corso Italia","Corso Venezia","Via dei Fiori"
+    ].map(st=>`${Math.floor(Math.random()*150)+1} ${st}`),
+    cities:[
+      "Rome","Milan","Naples","Turin","Palermo","Genoa","Bologna","Florence","Venice","Verona",
+      "Messina","Padua","Trieste","Brescia","Parma","Modena","Reggio Emilia","Catania","Livorno","Foggia",
+      "Perugia","Ravenna","Salerno","Cagliari","Mantua","Trento","Bolzano","Siena","Arezzo","La Spezia",
+      "Novara","Pistoia","Pavia","Terni","Fermo","Crotone","Avellino","Viterbo","Potenza","Rieti",
+      "Lecce","Reggio Calabria","Catanzaro","Trapani","Cosenza","Sassari","Brindisi","Belluno","Aosta","Biella"
+    ]
+  },
+
+  BR: {
+    firstNames:[
+      "Miguel","Alice","Arthur","Laura","Heitor","Sophia","Davi","Julia","Gabriel","Valentina",
+      "Lucas","Isabella","Enzo","Helena","Matheus","Maria","Pedro","Manuela","Guilherme","Beatriz",
+      "Rafael","Lara","Leonardo","Camila","Vinicius","Luiza","Felipe","Mariana","Thiago","Nicole",
+      "Bruno","Amanda","Gustavo","Carolina","Henrique","Bianca","Caio","Letícia","Diego","Melissa",
+      "Fernando","Giovana","Vitor","Isadora","Mateus","Fernanda","Eduardo","Larissa","Samuel","Clara"
+    ],
+    lastNames:[
+      "Silva","Santos","Oliveira","Souza","Pereira","Lima","Carvalho","Gomes","Ribeiro","Almeida",
+      "Costa","Ferreira","Rodrigues","Martins","Araújo","Barbosa","Monteiro","Mendes","Fonseca","Pinto",
+      "Cardoso","Rocha","Dias","Cavalcanti","Melo","Teixeira","Campos","Azevedo","Moreira","Correia",
+      "Nunes","Vieira","Assis","Siqueira","Rezende","Lopes","Freitas","Camargo","Peixoto","Marques",
+      "Machado","Coelho","Ramos","Ferraz","Borges","Pacheco","Farias","Queiroz","Novaes","Amaral"
+    ],
+    streets:[
+      "Rua das Flores","Rua do Sol","Avenida Brasil","Rua da Paz","Rua Nova","Avenida Paulista","Rua São João","Rua XV de Novembro","Rua da Liberdade","Rua das Acácias",
+      "Rua das Palmeiras","Rua do Comércio","Avenida Rio Branco","Rua Sete de Setembro","Rua dos Andradas","Rua das Rosas","Rua das Orquídeas","Rua dos Pinheiros","Rua do Carmo","Rua da Alegria",
+      "Rua da Esperança","Rua do Mar","Rua das Américas","Rua do Horizonte","Avenida Getúlio Vargas","Rua do Progresso","Rua do Comércio Novo","Rua do Sol Nascente","Rua das Palmeiras Altas","Rua das Flores Novas",
+      "Rua do Porto","Rua do Pôr do Sol","Rua do Cruzeiro","Rua do Limoeiro","Rua das Acácias Novas","Rua do Bosque","Rua das Hortênsias","Rua do Jardim","Rua das Begônias","Rua do Cedro",
+      "Rua das Camélias","Rua dos Jasmins","Rua das Magnólias","Rua dos Ipês","Rua do Cedro Alto","Rua das Orquídeas Altas","Rua dos Jacarandás","Rua dos Manacás","Rua do Eucalipto","Rua dos Pinheiros Novos"
+    ].map(st=>`${Math.floor(Math.random()*150)+1} ${st}`),
+    cities:[
+      "São Paulo","Rio de Janeiro","Brasília","Salvador","Fortaleza","Belo Horizonte","Manaus","Curitiba","Recife","Porto Alegre",
+      "Belém","Goiânia","Guarulhos","Campinas","São Luís","São Gonçalo","Maceió","Duque de Caxias","Natal","Teresina",
+      "Campo Grande","João Pessoa","Nova Iguaçu","Santo André","Osasco","São Bernardo","Jaboatão","Contagem","Uberlândia","Sorocaba",
+      "Ribeirão Preto","Niterói","Caxias do Sul","Pelotas","Florianópolis","Maringá","Anápolis","São José","Bauru","Petrolina",
+      "Franca","Vila Velha","Mauá","Caruaru","Foz do Iguaçu","Várzea Grande","Marília","Cabo Frio","Itaboraí","Londrina"
+    ]
+  }
+};
+
+
+
+// ==== RANDOM UTILS ====
+const hobbies=["photography","gaming","cooking","hiking","reading","gardening","painting","coding","traveling","fitness"];
+const pets=["dog","cat","parrot","hamster","rabbit","none"];
+const religions=["None","Christianity","Islam","Judaism","Buddhism","Hinduism","Other"];
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+// ==== GENERATION ====
+function generateProfile(country){
+  const data = datasets[country];
+  const gender = pick(["male","female"]);
+  const first = pick(data.firstNames);
+  const last = pick(data.lastNames);
+  const street = pick(data.streets);
+  const city = pick(data.cities);
+  const age = randInt(18,65);
+  const pseudo = `${first.toLowerCase()}_${randInt(1,999)}`;
+  const avatar = `https://api.dicebear.com/6.x/avataaars/svg?seed=${pseudo}`;
+  return {
+    fullName:`${first} ${last}`,
+    sex:gender,
+    age,
+    country,
+    address:`${street}, ${city}`,
+    pseudo,
+    hobby:pick(hobbies),
+    pet:pick(pets),
+    religion:pick(religions),
+    email:`${first.toLowerCase()}.${last.toLowerCase()}${randInt(1,99)}@example.com`,
+    phone:`+${randInt(1,99)} ${randInt(100000000,999999999)} `,
+    avatar
+  };
+}
+
+function generateProfiles(qty){
+  const selectedCountries = Array.from(document.getElementById('country').selectedOptions).map(o=>o.value);
+  if(selectedCountries.length===0) selectedCountries.push("FR");
+  const profiles = [];
+  for(let i=0;i<qty;i++){
+    const country = pick(selectedCountries);
+    profiles.push(generateProfile(country));
+  }
+  return profiles;
+}
+
+function renderProfiles(profiles){
+  const outputEl = document.getElementById('output');
+  outputEl.innerHTML="";
+  document.getElementById('generatedCount').textContent=`${profiles.length} profiles`;
+  profiles.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='card-id';
+    card.innerHTML=`
+      <div class="avatar"><img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="id-body">
+        <div style="font-weight:700">${p.fullName}</div>
+        <div class="id-line muted"><span class="tag">${p.sex}</span><span class="tag">Age: ${p.age}</span><span class="tag">${p.email}</span></div>
+        <div class="id-line">${p.address}</div>
+        <div class="id-line muted"><span class="tag">Hobby: ${p.hobby}</span><span class="tag">Pet: ${p.pet}</span><span class="tag">Religion: ${p.religion}</span><span class="tag">Pseudo: ${p.pseudo}</span></div>
+      </div>`;
+    outputEl.appendChild(card);
+  });
+}
+
+let latestProfiles=[];
+document.getElementById('generate').addEventListener('click',()=>{
+  const qty = parseInt(document.getElementById('count').value)||1;
+  latestProfiles = generateProfiles(qty);
+  renderProfiles(latestProfiles);
+});
+
+document.getElementById('clear').addEventListener('click',()=>{
+  latestProfiles=[];
+  document.getElementById('output').innerHTML="";
+  document.getElementById('generatedCount').textContent="0 profiles";
+});
+
+document.getElementById('copyAllJson').addEventListener('click',()=>{
+  if(!latestProfiles.length) return;
+  navigator.clipboard.writeText(JSON.stringify(latestProfiles,null,2));
+  document.getElementById('copyAllJson').textContent='Copied!';
+  setTimeout(()=>document.getElementById('copyAllJson').textContent='Copy JSON',900);
+});
+
+document.getElementById('downloadJson').addEventListener('click',()=>{
+  if(!latestProfiles.length) return;
+  const data = JSON.stringify(latestProfiles,null,2);
+  const blob = new Blob([data],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`random_profiles_${Date.now()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('exportJSON').addEventListener('click',()=>document.getElementById('downloadJson').click());
+</script>
+</body>
+</html>
